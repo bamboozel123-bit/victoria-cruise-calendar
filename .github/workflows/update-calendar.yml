@@ -1,0 +1,36 @@
+name: Update cruise calendar
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-calendar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate calendar
+        run: python generate_calendar.py
+
+      - name: Commit updated calendar
+        run: |
+          git config user.name "Cruise Calendar Bot"
+          git config user.email "actions@github.com"
+          git add docs/cruise-calendar.ics
+          git diff --cached --quiet || git commit -m "Update cruise calendar"
+          git push
